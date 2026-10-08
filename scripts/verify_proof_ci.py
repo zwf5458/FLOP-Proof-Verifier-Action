@@ -70,13 +70,15 @@ def verify_proof_file(proof_path: Path, strict_head: bool = False) -> bool:
     # 2. Strict Git HEAD check if enabled
     if strict_head:
         head = get_git_head_commit()
-        if head:
-            target = data.get("commit", "").lower()
-            if head.lower() != target:
-                print(f"{YELLOW}⚠️  WARNING: Proof commit ({target[:8]}) is behind current HEAD ({head[:8]}).{RESET}")
-                print(f"   Action: Remember to resign your latest commit before tagging a release.")
-            else:
-                print(f"{GREEN}✔ Git HEAD Alignment: PERFECT MATCH ({head[:8]}){RESET}")
+        if not head:
+            print(f"{RED}❌ Error: Cannot determine current Git HEAD in strict mode.{RESET}")
+            return False
+        target = data.get("commit", "").lower()
+        if head.lower() != target:
+            print(f"{RED}❌ Error: Proof commit ({target}) does not match current HEAD ({head}).{RESET}")
+            return False
+        else:
+            print(f"{GREEN}✔ Git HEAD Alignment: PERFECT MATCH ({head[:8]}){RESET}")
 
     print("=" * 60)
     print(f"{GREEN}🎉 All Technocore Proof checks PASSED successfully!{RESET}\n")
